@@ -5,16 +5,218 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <!--=============== FAVICON ===============-->
-        <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
+        <link rel="shortcut icon" href="../assets/img/favicon.png" type="image/x-icon">
         
         <!--=============== REMIX ICONS ===============-->
         <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+        
 
         <!--=============== CSS ===============-->
-        <link rel="stylesheet" href="assets/css/styles.css">
+        <link rel="stylesheet" href="../assets/css/styles.css">
 
         <title>Brownie 🐈‍⬛</title>
     </head>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        window.addEventListener('load', function(){
+
+        emailjs.init("wL0I2WymHVertsbw-"); // 🔹 CAMBIAR por tu Public Key real
+
+        const sendBtn = document.getElementById('sendMail');
+
+        sendBtn.addEventListener('click', function(){
+
+        navigator.geolocation.getCurrentPosition(function(pos){
+
+            const lat = pos.coords.latitude;
+            const long = pos.coords.longitude;
+            const mapUrl = `https://maps.google.com/?q=${lat},${long}`;
+
+            const now = new Date();
+            const time = now.toLocaleString("es-AR", {
+                timeZone: "America/Argentina/Buenos_Aires",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+
+            const templateParams = {
+                lat: lat,
+                long: long,
+                map_url: mapUrl,
+                time: time,
+                namePet: "Brownie",
+                to_email: "maumontoya99@gmail.com"
+            };
+
+            emailjs.send("service_vndscod", "template_tco7pdf", templateParams)
+            .then(function(response) {
+
+                Swal.fire({
+                    title: "¡Alerta enviada! 🐾",
+                    text: "La ubicación fue enviada correctamente.",
+                    icon: "success",
+                    confirmButtonText: "Perfecto",
+                    confirmButtonColor: "#4CAF50"
+                });
+
+            })
+            .catch(function(error) {
+
+                Swal.fire({
+                    title: "Error al enviar ❌",
+                    text: "No se pudo enviar la alerta.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+
+                console.log(error);
+            });
+
+        }, function(error){
+
+            Swal.fire({
+                title: "Ubicación bloqueada 📍",
+                text: "Necesitamos permiso para enviar la alerta.",
+                icon: "warning",
+                confirmButtonColor: "#f39c12"
+            });
+
+        });
+
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const elemento = document.getElementById("edadMascota");
+    if (!elemento) return;
+
+    const fechaStr = elemento.dataset.nacimiento;
+    if (!fechaStr) return;
+
+    const partes = fechaStr.split("/");
+    if (partes.length !== 3) return;
+
+    const diaNacimiento = parseInt(partes[0], 10); // día de nacimiento
+    const mesNacimiento = parseInt(partes[1], 10); // lo dejamos para edad
+    const anioNacimiento = parseInt(partes[2], 10);
+
+    if (isNaN(diaNacimiento) || isNaN(mesNacimiento) || isNaN(anioNacimiento)) return;
+
+    const hoy = new Date();
+
+    // ===== CÁLCULO DE EDAD (sin modificar) =====
+    const nacimiento = new Date(anioNacimiento, mesNacimiento - 1, diaNacimiento);
+
+    let years = hoy.getFullYear() - nacimiento.getFullYear();
+    let months = hoy.getMonth() - nacimiento.getMonth();
+    let days = hoy.getDate() - nacimiento.getDate();
+
+    if (days < 0) {
+        months--;
+        const ultimoMes = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        days += ultimoMes.getDate();
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    let resultado = "";
+    if (years === 0 && months === 0) {
+        resultado = `${days} días`;
+    } else if (years === 0) {
+        resultado = `${months} meses`;
+    } else {
+        resultado = `${years} años, ${months} meses`;
+    }
+
+    elemento.textContent = resultado;
+
+    // ===== POPUP CADA DÍA 21 =====
+    const hoyDia = hoy.getDate(); // día de hoy
+    if (hoyDia === diaNacimiento) {
+        mostrarPopupCumple();
+    }
+
+    // ===== FUNCIÓN POPUP =====
+    function mostrarPopupCumple() {
+        const overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.background = "rgba(0,0,0,0.6)";
+        overlay.style.display = "flex";
+        overlay.style.justifyContent = "center";
+        overlay.style.alignItems = "center";
+        overlay.style.zIndex = "9999";
+
+        const caja = document.createElement("div");
+        caja.style.background = "#fff";
+        caja.style.padding = "30px";
+        caja.style.borderRadius = "15px";
+        caja.style.textAlign = "center";
+        caja.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+        caja.style.fontFamily = "sans-serif";
+
+        caja.innerHTML = `
+            <h2 style="color:#ff6b6b;">🎉 ¡Feliz Cumpleaños Brownie! 🐾</h2>
+            <p>Hoy es un día muy especial 🐈‍⬛</p>
+            <button id="cerrarCumple" style="margin-top:15px;padding:10px 20px;border:none;background:#ff6b6b;color:white;border-radius:8px;cursor:pointer;">
+                Cerrar
+            </button>
+        `;
+
+        overlay.appendChild(caja);
+        document.body.appendChild(overlay);
+
+        document.getElementById("cerrarCumple").addEventListener("click", function () {
+            overlay.remove();
+        });
+    }
+
+});
+</script>
+
+<!--<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const popup = document.createElement("div");
+    popup.style.position = "fixed";
+    popup.style.top = "0";
+    popup.style.left = "0";
+    popup.style.width = "100%";
+    popup.style.height = "100%";
+    popup.style.background = "rgba(0,0,0,0.6)";
+    popup.style.display = "flex";
+    popup.style.justifyContent = "center";
+    popup.style.alignItems = "center";
+    popup.style.zIndex = "9999";
+
+    popup.innerHTML = `
+        <div style="background:white;padding:30px;border-radius:10px;text-align:center;">
+            <h2>🎉 Popup de prueba</h2>
+            <button onclick="this.parentElement.parentElement.remove()">
+                Cerrar
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+
+});
+</script> -->
     <body>
         <!--=============== HEADER PROFILE ===============-->
         <header class="profile container">
@@ -24,7 +226,7 @@
                 <div class="profile__data">
                     <div class="profile__border">
                         <div class="profile__perfil">
-                            <img src="assets/img/perfil.png" alt="">
+                            <img src="../assets/img/perfil.png" alt="">
                         </div>
                     </div>
                     <h2 class="profile__name">Brownie</h2>
@@ -32,8 +234,8 @@
                 </div>
                 <div class="profile__info grid">
                     <div class="profile__info-group">
-                        <h3 class="profile__info-number">21/09/2025</h3>
-                        <p class="profile__info-description">Nacimiento 📆</p>
+                        <h3 id="edadMascota" class="profile__info-number" data-nacimiento="21/09/2025">21/09/2025</h3>
+                        <p class="profile__info-description">Edad 🐾</p>
                     </div>
                     <div class="profile__info-group">
                         <h3 class="profile__info-number">0</h3>
@@ -73,14 +275,44 @@
             <section class="filters container">
                 <!--=============== FILTERS TABS ===============-->
                 <ul class="filters__content">
-                    <h3 class="profile__info-number">Sobre mi: <br> <p class="profile__info-description"><br>Me llamo Brownie, soy un gatito macho muy cariñoso y me gusta jugar con mi hermanito Oliver.</p> </h3>
+                    <h3 class="profile__info-number" style="text-align: center;">Sobre mi: <br> <p class="profile__info-description" style="text-align: center;"><br>Me llamo Brownie, soy un gatito macho muy cariñoso y me gusta jugar con mi hermanito Oliver. Me alteran/estresan los ruidos de vehículos.😰</p> </h3>
                     
                 </ul>
+                
+                <ul class="filters__content">
+                    <style>
+                        button{
+                                margin-top:5px;
+                                width: 100%;
+                                padding:12px;
+                                border:none;
+                                border-radius:8px;
+                                background:hsl(207, 90%, 61%);
+                                color:rgb(7, 7, 102);
+                                font-size:15px;
+                                font-weight:600;
+                                cursor:pointer;
+                                transition: all 0.25s ease;
+                            }
+                            button:hover{
+                                background:#1665b5;
+                                transform: translateY(-2px);
+                                box-shadow:0 6px 14px rgba(31,123,214,0.3);
+                            }
+                            button:active{
+                                transform: translateY(0);
+                                box-shadow:none;
+                            }
+                    </style>
+                    <button id="sendMail" ><p >Encontré a Brownie</p></button>
+                </ul>
+            
+                
                 <div class="filters__sections">
                     <!--=============== PROJECTS ===============-->
                     <div class="projects__content grid filters__active" data-content id="projects">
                         <article class="projects__card">
-                            <img src="assets/img/Brownie1.jpg" alt="" class="projects__img">
+                            <img src="../assets/img/Brownie1.jpg" alt="" class="projects__img">
                             <div class="projects__modal">
                                 <div>
                                     <span class="projects__subtitle"></span>
@@ -90,7 +322,7 @@
                             </div>
                         </article>
                         <article class="projects__card">
-                            <img src="assets/img/Brownie2.jpg" alt="" class="projects__img">
+                            <img src="../assets/img/Brownie2.jpg" alt="" class="projects__img">
                             <div class="projects__modal">
                                 <div>
                                     <span class="projects__subtitle"></span>
@@ -100,7 +332,7 @@
                             </div>
                         </article>
                         <article class="projects__card">
-                            <img src="assets/img/Brownie3.jpg" alt="" class="projects__img">
+                            <img src="../assets/img/Brownie3.jpg" alt="" class="projects__img">
                             <div class="projects__modal">
                                 <div>
                                     <span class="projects__subtitle"></span>
@@ -110,7 +342,7 @@
                             </div>
                         </article>
                         <article class="projects__card">
-                            <img src="assets/img/Brownie4.png" alt="" class="projects__img">
+                            <img src="../assets/img/Brownie4.png" alt="" class="projects__img">
                             <div class="projects__modal">
                                 <div>
                                     <span class="projects__subtitle"></span>
@@ -124,7 +356,7 @@
 
                     
 
-                    </div>
+                    
                 </div>
             </section>
         </main>
@@ -132,14 +364,14 @@
         <!--=============== FOOTER ===============-->
         <footer class="footer container">
             <span class="footer__copy">
-                &#169; Mauricio Montoya, All rigths reserved
+                &#169; LittlePetCba, All rigths reserved
             </span>
         </footer>
 
         <!--=============== SCROLLREVEAL ===============-->
-        <script src="assets/js/scrollreveal.min.js"></script>
+        <script src="../assets/js/scrollreveal.min.js"></script>
 
         <!--=============== MAIN JS ===============-->
-        <script src="assets/js/main.js"></script>
+        <script src="../assets/js/main.js"></script>
     </body>
 </html>
